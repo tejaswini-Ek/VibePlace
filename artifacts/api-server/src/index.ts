@@ -1,5 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { connectMongo } from "./config/mongo";
+import { initializeCache } from "./services/cache";
 
 const rawPort = process.env["PORT"];
 
@@ -23,3 +25,6 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
 });
+
+void connectMongo();
+void initializeCache();

@@ -3,13 +3,27 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: API for the Mood Place Finder application
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: places
+    description: OpenStreetMap place search and recommendations
+  - name: locations
+    description: Location search and geocoding
+  - name: auth
+    description: Account registration and login
+  - name: users
+    description: User profile
+  - name: favourites
+    description: Saved places
+  - name: search-history
+    description: Recent place searches
+  - name: weather
+    description: Current weather
 paths:
   /healthz:
     get:
@@ -24,7 +38,371 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /places:
+    get:
+      operationId: searchPlaces
+      tags: [places]
+      summary: Find places for a location and category
+      parameters:
+        - name: location
+          in: query
+          required: false
+          schema: { type: string }
+        - name: city
+          in: query
+          required: false
+          schema: { type: string }
+        - name: state
+          in: query
+          required: false
+          schema: { type: string }
+        - name: country
+          in: query
+          required: false
+          schema: { type: string }
+        - name: category
+          in: query
+          required: false
+          schema: { type: string }
+        - name: mood
+          in: query
+          required: false
+          schema: { type: string }
+        - name: latitude
+          in: query
+          required: false
+          schema: { type: number, minimum: -90, maximum: 90 }
+        - name: longitude
+          in: query
+          required: false
+          schema: { type: number, minimum: -180, maximum: 180 }
+        - name: radiusKm
+          in: query
+          required: false
+          schema: { type: number, minimum: 1, maximum: 20, default: 5 }
+        - name: page
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 12 }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, enum: [distance, name], default: distance }
+      responses:
+        "200":
+          description: Places matching the location and filters
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlacesSearchResponse"
+        "400":
+          description: Invalid search parameters
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "502":
+          description: OpenStreetMap service unavailable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /locations/search:
+    get:
+      operationId: searchLocations
+      tags: [locations]
+      summary: Find country, state, city, or place suggestions
+      parameters:
+        - name: query
+          in: query
+          required: true
+          schema: { type: string, minLength: 2 }
+      responses:
+        "200":
+          description: Matching location suggestions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/LocationSuggestion" }
+        "400":
+          description: Query is too short
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [auth]
+      summary: Create an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserRegistrationInput" }
+      responses:
+        "201":
+          description: Account created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthSession" }
+        "400":
+          description: Invalid registration details
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "409":
+          description: Email is already registered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "503":
+          description: Database is not configured
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [auth]
+      summary: Sign in to an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/UserLoginInput" }
+      responses:
+        "200":
+          description: Signed-in user and access token
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthSession" }
+        "401":
+          description: Email or password is incorrect
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "503":
+          description: Database or token signing is not configured
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [auth]
+      summary: Sign out on the client
+      responses:
+        "200":
+          description: Logout confirmation
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MessageResponse" }
+  /users/me:
+    get:
+      operationId: getCurrentUser
+      tags: [users]
+      summary: Get the signed-in user's profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Current user's profile
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /favourites:
+    get:
+      operationId: listFavourites
+      tags: [favourites]
+      summary: List the signed-in user's saved places
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: Saved places
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Favourite" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    post:
+      operationId: addFavourite
+      tags: [favourites]
+      summary: Save a place to favourites
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PlaceInput" }
+      responses:
+        "201":
+          description: Saved place
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Favourite" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /favourites/{placeId}:
+    delete:
+      operationId: removeFavourite
+      tags: [favourites]
+      summary: Remove a saved place
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: placeId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Place removed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MessageResponse" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /search-history:
+    get:
+      operationId: listSearchHistory
+      tags: [search-history]
+      summary: List the signed-in user's recent searches
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+      responses:
+        "200":
+          description: Recent search history
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SearchHistoryEntry" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+    post:
+      operationId: saveSearchHistory
+      tags: [search-history]
+      summary: Save a completed search
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SearchHistoryInput" }
+      responses:
+        "201":
+          description: Saved search
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SearchHistoryEntry" }
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /weather:
+    get:
+      operationId: getWeather
+      tags: [weather]
+      summary: Get current weather for coordinates
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          schema: { type: number, minimum: -90, maximum: 90 }
+        - name: longitude
+          in: query
+          required: true
+          schema: { type: number, minimum: -180, maximum: 180 }
+      responses:
+        "200":
+          description: Current weather and indoor/outdoor hint
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WeatherReport" }
+        "502":
+          description: Weather service unavailable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /recommendations:
+    get:
+      operationId: getRecommendations
+      tags: [places]
+      summary: Get places matched to a mood and location
+      parameters:
+        - name: location
+          in: query
+          required: false
+          schema: { type: string }
+        - name: latitude
+          in: query
+          required: false
+          schema: { type: number, minimum: -90, maximum: 90 }
+        - name: longitude
+          in: query
+          required: false
+          schema: { type: number, minimum: -180, maximum: 180 }
+        - name: radiusKm
+          in: query
+          required: false
+          schema: { type: number, minimum: 1, maximum: 20, default: 5 }
+        - name: mood
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [relax, date, party, work, outdoor, quick-bite]
+        - name: weather
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Recommended places and matched category
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RecommendationResponse" }
+        "400":
+          description: Invalid recommendation query
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "502":
+          description: OpenStreetMap service unavailable
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +411,139 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
+    MessageResponse:
+      type: object
+      properties:
+        message: { type: string }
+      required: [message]
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        createdAt: { type: string, format: date-time }
+      required: [id, name, email, createdAt]
+    UserRegistrationInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 2, maxLength: 80 }
+        email: { type: string, format: email, maxLength: 254 }
+        password: { type: string, minLength: 8, maxLength: 128 }
+      required: [name, email, password]
+    UserLoginInput:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 1, maxLength: 128 }
+      required: [email, password]
+    AuthSession:
+      type: object
+      properties:
+        token: { type: string }
+        user: { $ref: "#/components/schemas/User" }
+      required: [token, user]
+    Place:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        category: { type: string }
+        address: { type: string }
+        city: { type: ["string", "null"] }
+        state: { type: ["string", "null"] }
+        country: { type: ["string", "null"] }
+        latitude: { type: number }
+        longitude: { type: number }
+        externalId: { type: string }
+        distanceKm: { type: ["number", "null"] }
+      required: [id, name, category, address, latitude, longitude, externalId]
+    PlaceInput:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string, minLength: 1, maxLength: 160 }
+        category: { type: string }
+        address: { type: string }
+        city: { type: ["string", "null"] }
+        state: { type: ["string", "null"] }
+        country: { type: ["string", "null"] }
+        latitude: { type: number, minimum: -90, maximum: 90 }
+        longitude: { type: number, minimum: -180, maximum: 180 }
+        externalId: { type: string }
+      required: [id, name, category, address, latitude, longitude, externalId]
+    PlacesSearchResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Place" }
+        total: { type: integer }
+        page: { type: integer }
+        pageSize: { type: integer }
+        centerLatitude: { type: number }
+        centerLongitude: { type: number }
+      required: [items, total, page, pageSize, centerLatitude, centerLongitude]
+    LocationSuggestion:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        displayName: { type: string }
+        city: { type: ["string", "null"] }
+        state: { type: ["string", "null"] }
+        country: { type: ["string", "null"] }
+        latitude: { type: number }
+        longitude: { type: number }
+      required: [id, name, displayName, latitude, longitude]
+    Favourite:
+      type: object
+      properties:
+        id: { type: string }
+        place: { $ref: "#/components/schemas/Place" }
+        createdAt: { type: string, format: date-time }
+      required: [id, place, createdAt]
+    SearchHistoryInput:
+      type: object
+      properties:
+        location: { type: string, minLength: 1, maxLength: 240 }
+        category: { type: string, minLength: 1, maxLength: 80 }
+        mood: { type: ["string", "null"] }
+        latitude: { type: ["number", "null"] }
+        longitude: { type: ["number", "null"] }
+      required: [location, category]
+    SearchHistoryEntry:
+      type: object
+      properties:
+        id: { type: string }
+        location: { type: string }
+        category: { type: string }
+        mood: { type: ["string", "null"] }
+        latitude: { type: ["number", "null"] }
+        longitude: { type: ["number", "null"] }
+        createdAt: { type: string, format: date-time }
+      required: [id, location, category, createdAt]
+    WeatherReport:
+      type: object
+      properties:
+        temperatureC: { type: number }
+        condition: { type: string }
+        isRaining: { type: boolean }
+        recommendationHint: { type: string }
+      required: [temperatureC, condition, isRaining, recommendationHint]
+    RecommendationResponse:
+      type: object
+      properties:
+        mood: { type: string }
+        matchedCategory: { type: string }
+        weatherHint: { type: ["string", "null"] }
+        places:
+          type: array
+          items: { $ref: "#/components/schemas/Place" }
+      required: [mood, matchedCategory, places]
 
