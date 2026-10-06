@@ -1,0 +1,458 @@
+8. Backend Folder Structure
+What to do:
+Create separation for:
+•	Routes 
+•	Controllers 
+•	Services 
+•	Models 
+•	Middleware 
+•	Utilities 
+•	Configuration 
+________________________________________
+9. API Route Setup
+What to do:
+•	Create API routes. 
+•	Create /api base route. 
+•	Create separate routes for: 
+o	Authentication 
+o	Places 
+o	Favourites 
+o	Users 
+o	Search history 
+________________________________________
+10. Error Handling
+What to do:
+•	Handle invalid requests. 
+•	Handle database errors. 
+•	Handle external API errors. 
+•	Return appropriate HTTP status codes. 
+•	Create centralized error handling. 
+________________________________________
+PHASE 3 — MongoDB
+11. MongoDB Setup
+What to do:
+•	Install/use MongoDB. 
+•	Create the project database. 
+•	Configure MongoDB connection. 
+Database: MongoDB.
+________________________________________
+12. Mongoose Setup
+What to do:
+•	Install Mongoose. 
+•	Connect Node.js to MongoDB. 
+•	Handle connection success/failure. 
+________________________________________
+13. User Model
+What to do:
+Create user fields such as:
+•	Name 
+•	Email 
+•	Password 
+•	Created date 
+________________________________________
+14. Place Model
+What to do:
+Store relevant place information such as:
+•	Place name 
+•	Category 
+•	Address 
+•	City 
+•	State 
+•	Country 
+•	Latitude 
+•	Longitude 
+•	External place ID 
+________________________________________
+15. Favourite Model
+What to do:
+•	Connect user with favourite places. 
+•	Store the user ID. 
+•	Store the place information/ID. 
+•	Store creation date. 
+________________________________________
+16. Search History Model
+What to do:
+•	Store user searches. 
+•	Store searched location. 
+•	Store selected category. 
+•	Store search date/time. 
+________________________________________
+PHASE 4 — Authentication
+17. User Registration
+What to do:
+•	Create registration API. 
+•	Receive user information. 
+•	Validate input. 
+•	Check whether email already exists. 
+•	Save user. 
+________________________________________
+18. Password Hashing
+What to do:
+•	Never store plaintext passwords. 
+•	Hash passwords before saving. 
+•	Compare hashed passwords during login. 
+Technology: bcrypt/bcryptjs.
+________________________________________
+19. User Login
+What to do:
+•	Receive email/password. 
+•	Find user. 
+•	Verify password. 
+•	Generate authentication token. 
+________________________________________
+20. JWT Authentication
+What to do:
+•	Generate JWT after successful login. 
+•	Send token to frontend. 
+•	Verify token for protected APIs. 
+________________________________________
+21. Authentication Middleware
+What to do:
+•	Read authentication token. 
+•	Verify token. 
+•	Identify logged-in user. 
+•	Allow or reject request. 
+________________________________________
+22. Protected Routes
+What to do:
+Protect APIs such as:
+•	Add favourite 
+•	Remove favourite 
+•	Get favourites 
+•	Search history 
+•	User profile 
+________________________________________
+PHASE 5 — OpenStreetMap & Places
+23. OpenStreetMap Integration
+What to do:
+•	Connect backend with OpenStreetMap-related services. 
+•	Determine what location/place information is required. 
+________________________________________
+24. Overpass API Integration
+What to do:
+•	Build Overpass queries. 
+•	Send location/category information. 
+•	Receive POI data. 
+•	Process the response. 
+________________________________________
+25. OSM Service Layer
+What to do:
+Create a dedicated service responsible for:
+•	Building queries 
+•	Calling Overpass 
+•	Handling errors 
+•	Parsing results 
+•	Returning standardized place data 
+________________________________________
+26. Location Search
+What to do:
+Allow users to select:
+Country → State → City → Category
+________________________________________
+27. Country Selection
+What to do:
+•	Create country selection. 
+•	Store selected country. 
+•	Use it as part of the search. 
+________________________________________
+28. State Selection
+What to do:
+•	Display states based on selected country. 
+•	Store selected state. 
+________________________________________
+29. City Selection
+What to do:
+•	Display/select city. 
+•	Store selected city. 
+________________________________________
+30. Place Category Selection
+What to do:
+Allow categories such as:
+•	Restaurant 
+•	Cafe 
+•	Park 
+•	Hospital 
+•	Shopping 
+•	Tourist Place 
+•	Hotel 
+•	Gym 
+•	etc. 
+________________________________________
+31. Nearby Place Retrieval
+What to do:
+•	Send location + category to backend. 
+•	Backend creates external API query. 
+•	Retrieve nearby places. 
+•	Return places to frontend. 
+________________________________________
+32. Place Data Formatting
+What to do:
+Convert external API data into a consistent structure containing:
+•	Name 
+•	Category 
+•	Location 
+•	Address 
+•	Latitude 
+•	Longitude 
+•	Place ID 
+________________________________________
+33. Places API
+What to do:
+Create:
+GET /api/places
+It should:
+Receive location → validate → call OSM → process places → return JSON.
+________________________________________
+PHASE 6 — Frontend
+34. React Routing
+What to do:
+Create routes/pages for:
+•	Home 
+•	Login 
+•	Register 
+•	Places 
+•	Place Details 
+•	Favourites 
+•	Profile 
+•	Search History 
+________________________________________
+35. Navbar
+What to do:
+Create navigation for:
+•	Home 
+•	Search 
+•	Favourites 
+•	Profile 
+•	Login/Logout 
+________________________________________
+36. Home Page
+What to do:
+Create the main search interface.
+User should be able to select:
+Location + Category → Search
+________________________________________
+37. Location Selection UI
+What to do:
+Create:
+•	Country dropdown 
+•	State dropdown 
+•	City dropdown 
+•	Category dropdown 
+________________________________________
+38. API Integration
+What to do:
+Connect React to Express.
+React → API request → Express → OSM → Express → React
+________________________________________
+39. Place Results Page
+What to do:
+Display retrieved places.
+Each place can be displayed as a card.
+________________________________________
+40. Place Card
+What to do:
+Display:
+•	Place name 
+•	Category 
+•	Address 
+•	Distance 
+•	Favourite button 
+•	View details button 
+________________________________________
+41. Place Details
+What to do:
+Display detailed information about the selected place.
+________________________________________
+PHASE 7 — Favourites
+42. Add Favourite
+What to do:
+•	User clicks favourite. 
+•	Send request to backend. 
+•	Store favourite in MongoDB. 
+________________________________________
+43. Remove Favourite
+What to do:
+•	User clicks favourite again. 
+•	Remove it from MongoDB. 
+________________________________________
+44. Favourite Places Page
+What to do:
+•	Fetch logged-in user's favourites. 
+•	Display them in the frontend. 
+________________________________________
+PHASE 8 — Search History
+45. Save Search History
+What to do:
+Store:
+•	User 
+•	Location 
+•	Category 
+•	Date/time 
+________________________________________
+46. Search History Page
+What to do:
+•	Fetch user's previous searches. 
+•	Display them. 
+•	Allow user to repeat a search. 
+________________________________________
+PHASE 9 — Map
+47. Map Integration
+What to do:
+Add an interactive map to the application.
+________________________________________
+48. Place Markers
+What to do:
+•	Take latitude/longitude. 
+•	Display markers on the map. 
+•	Clicking marker shows place information. 
+________________________________________
+49. User Location
+What to do:
+•	Obtain user's location with browser geolocation permission. 
+•	Display user's position. 
+________________________________________
+50. Distance Calculation
+What to do:
+Calculate distance between:
+User location ↔ Place location
+________________________________________
+51. Nearby Radius Search
+What to do:
+Allow users to select a radius such as:
+•	1 km 
+•	5 km 
+•	10 km 
+•	20 km 
+Then show places within that radius.
+________________________________________
+PHASE 10 — Filtering & Sorting
+52. Category Filtering
+What to do:
+Filter results by place category.
+53. Distance Filtering
+What to do:
+Show places within selected distance.
+54. Distance Sorting
+What to do:
+Sort:
+Nearest → Farthest
+55. Pagination
+What to do:
+Divide large results into pages instead of displaying everything at once.
+________________________________________
+PHASE 11 — Performance
+56. Redis Cache
+What to do:
+Before calling OSM:
+Request → Redis → Cache exists?
+•	Yes → return cached result 
+•	No → call OSM → save result in Redis → return result 
+________________________________________
+57. Rate Limiting
+What to do:
+Limit excessive API requests from one user/IP.
+________________________________________
+58. Production Logging
+What to do:
+Log:
+•	API requests 
+•	Errors 
+•	External API failures 
+•	Database errors 
+•	Important application events 
+________________________________________
+59. Health Check
+What to do:
+Create:
+GET /health
+Return backend status.
+________________________________________
+PHASE 12 — Recommendation Features
+60. Location-Based Recommendation
+What to do:
+Recommend places based on the selected location.
+61. Category-Based Recommendation
+What to do:
+Recommend places based on selected category.
+62. Nearby Recommendation
+What to do:
+Prioritize places close to the user's location.
+63. Weather-Based Recommendation
+What to do:
+Use weather information to influence recommendations.
+Example:
+Rain → Indoor places
+Good weather → Parks/outdoor places
+64. Mood-Based Recommendation
+What to do:
+Allow the user to select a mood/activity such as:
+•	Relax 
+•	Date 
+•	Party 
+•	Work 
+•	Outdoor 
+•	Quick Bite 
+Then recommend suitable places.
+________________________________________
+PHASE 13 — Testing
+65. Backend API Testing
+What to do:
+Test every API independently.
+66. Authentication Testing
+What to do:
+Test:
+•	Register 
+•	Login 
+•	Invalid password 
+•	Invalid token 
+•	Protected routes 
+67. Database Testing
+What to do:
+Verify:
+•	Create 
+•	Read 
+•	Update 
+•	Delete 
+68. Frontend Testing
+What to do:
+Test pages, forms, buttons, navigation, and API integration.
+69. Error Testing
+What to do:
+Test:
+•	Invalid location 
+•	No places found 
+•	OSM failure 
+•	MongoDB failure 
+•	Invalid user input 
+•	Network failure 
+________________________________________
+PHASE 14 — Documentation & Deployment
+70. Swagger / OpenAPI
+What to do:
+Document all backend APIs.
+71. Docker
+What to do:
+Containerize:
+•	Backend 
+•	Frontend 
+•	MongoDB where appropriate for development 
+72. Production Configuration
+What to do:
+Configure:
+•	Environment variables 
+•	Database 
+•	API URLs 
+•	Security settings 
+73. Backend Deployment
+What to do:
+Deploy Node/Express backend.
+74. Frontend Deployment
+What to do:
+Build and deploy React frontend.
+75. Database Deployment
+What to do:
+Deploy/use production MongoDB.
+76. CI/CD
+What to do:
+Automate:
+Git push → Build → Test → Deploy
