@@ -1,4 +1,4 @@
-# VibePlace — Mood-Based Place Recommender
+# VibePlace — Mood-Based Place Recommender (currently working on it)
 
 **Find your vibe. Discover your place!**
 
